@@ -1,0 +1,24 @@
+
+
+{ "regex": "/", 
+  "storage": ["disk", "tape"], 
+  "overridden_by": [ 
+    {"regex": "/neodc/sentinel", "storage": ["disk", "tape"], 
+     "overridden_by": [
+        {"regex": "/neodc/sentinel1.*/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/", "larger_than":10000000, 
+          "regex_older_than": "6m", "storage": ["tape"] },
+        {"regex": "/neodc/sentinel2.*/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/", "larger_than":10000000, 
+          "regex_older_than": "3m", "storage": ["tape"] },        
+        {"regex": "/neodc/sentinel3.*/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/", "larger_than":10000000, 
+          "regex_older_than": "2m", "storage": ["tape"] },
+        {"regex": "/neodc/sentinel5.*/(?P<year>\\d{4})/(?P<month>\\d{2})/(?P<day>\\d{2})/", "larger_than":10000000, 
+          "regex_older_than": "8m", "storage": ["tape"] }
+       ]},
+   {"regex": "/badc/cmip6/", "storage": ["disk", "tape"],
+      "overridden_by": [
+        {"regex": "/HighResMIP/(ECMWF|MIROC)/.*/r([5-9]|\\d{2,})i\\dp\\df\\d", "larger_than":10000000, 
+           "storage": ["tape"] }
+      ]},
+    {"regex": "/neodc/modis/data/", "storage": ["disk"]}
+ ]
+}
