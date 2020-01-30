@@ -139,6 +139,20 @@ class StoragePolicy():
         if self.match_storage_policy(path, size, mod):
             return self 
 
+    
+
+    def find_policy_by_storage(self, includes_storage, excludes_storage):
+        policies = []
+        if set(includes_storage).issubset(set(self.storage)) and set(excludes_storage).intersection(set(self.storage)) == set():
+            policies = [self]  
+        for o in self.overridden_by:
+            policies += o.find_policy_by_storage(includes_storage, excludes_storage) 
+        return policies 
+
+
+
+
+
 s = StoragePolicy(policy_location)
 s.tree()
 
@@ -151,6 +165,9 @@ else: mod = None
 
 print(path, size, mod)
 print(s.find_storage_policy(path, size=size, mod=mod))
+
+print()
+print(s.find_policy_by_storage(["disk"], ["tape"]))
 
 #print(s.find_storage_policy("/neodc/sentinel1a/data/x.dat"))
 #print(s.find_storage_policy("/neodc/sentinel1a/data//t/y/u/2014/01/03/x.dat", size=20))
