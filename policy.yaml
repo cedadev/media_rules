@@ -6,26 +6,26 @@ overridden_by:
   regex: /neodc/sentinel
   storage: [disk, tape]
   overridden_by:
-  - larger_than: 10000000
+  - larger_than: 10MB
     regex: /neodc/sentinel1.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
     regex_older_than: 6m
     storage: [tape]
-  - larger_than: 10000000
+  - larger_than: 10MB
     regex: /neodc/sentinel2.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
     regex_older_than: 3m
     storage: [tape]
-  - larger_than: 10000000
+  - larger_than: 10MB
     regex: /neodc/sentinel3.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
     regex_older_than: 2m
     storage: [tape]
-  - larger_than: 10000000
+  - larger_than: 10 MB
     regex: /neodc/sentinel5.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
-    regex_older_than: 8m
+    regex_older_than: 8 months
     storage: [tape]
 - regex: /badc/cmip6/
   storage: [disk, tape]
   overridden_by:
-  - larger_than: 10000000
+  - larger_than: 100 MB
     regex: /HighResMIP/(ECMWF|MIROC)/.*/r([5-9]|\d{2,})i\dp\df\d
     storage: [tape]
 - regex: /neodc/modis/data/

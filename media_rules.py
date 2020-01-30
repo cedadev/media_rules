@@ -30,6 +30,20 @@ class StoragePolicy():
         else: 
             raise Exception('Can not interperate "%s" as a YYYY-MM-DD date or a period of form N weeks, N months, N years or N days' % s) 
 
+    @staticmethod
+    def sizeparse(s):
+        if isinstance(s, int): return s
+        s = s.strip()
+
+        units = {"m": 1e6, "g": 1e9, "k": 1e3, "b": 1, "t": 1e12}
+        m = re.match("([\d.]+)\s*(\w)", s)
+        if m:
+            value, unit = m.groups()
+            unit = unit.lower()
+            return float(value) * units[unit]
+        else: 
+            raise Exception('Can not interperate "%s" as a YYYY-MM-DD date or a period of form N weeks, N months, N years or N days' % s) 
+
     def __init__(self, cfg):
         if isinstance(cfg, str):
             cfg = yaml.load(urllib.request.urlopen(cfg), Loader=yaml.SafeLoader)
@@ -49,13 +63,17 @@ class StoragePolicy():
             self.regex = re.compile("")
 
         if "regex_older_than" in cfg:
+            self.regex_older_than = cfg["regex_older_than"]
             self._regex_older_than = self.dateparse(cfg["regex_older_than"])
         else: 
+            self.regex_older_than = ""
             self._regex_older_than = None
 
         if "mod_older_than" in cfg:
+            self.mod_older_than = cfg["mod_older_than"]
             self._mod_older_than = self.dateparse(cfg["mod_older_than"])
         else: 
+            self.mod_older_than = ""
             self._mod_older_than = None
 
         if "storage" in cfg:
@@ -65,8 +83,10 @@ class StoragePolicy():
 
         if "larger_than" in cfg:
             self.larger_than = cfg["larger_than"]
+            self._larger_than = self.sizeparse(cfg["larger_than"])
         else:
-            self.larger_than = None
+            self.larger_than = ""
+            self._larger_than = None
 
         self.overridden_by = []
         if "overridden_by" in cfg:    
@@ -79,11 +99,11 @@ class StoragePolicy():
         else:
             s = "%s" % self.regex.pattern
         if self._mod_older_than is not None:
-            s += " mod time older than %s" % self._mod_older_than
+            s += " AND mod time > %s" % self.mod_older_than
         if self._regex_older_than is not None:
-            s += " regex time older than %s" % self._regex_older_than
-        if self.larger_than is not None:
-            s += " >%s bytes" % self.larger_than
+            s += " AND regex time > %s" % self.regex_older_than
+        if self._larger_than is not None:
+            s += " AND > %s" % self.larger_than
 
         return s
 
@@ -109,10 +129,10 @@ class StoragePolicy():
         if not match:
             return False
 
-        if self.larger_than is not None:
+        if self._larger_than is not None:
             if size is None:
                 raise ValueError("This policy needs a size to work (%s)" % self)
-            if size < self.larger_than:
+            if size < self._larger_than:
                 return False
 
         if self._mod_older_than is not None:
@@ -166,8 +186,36 @@ else: mod = None
 print(path, size, mod)
 print(s.find_storage_policy(path, size=size, mod=mod))
 
+
 print()
+print("disk, not tape or obstore")
+print(s.find_policy_by_storage(["disk"], ["tape", "obstore"]))
+print()
+print("disk, not tape")
 print(s.find_policy_by_storage(["disk"], ["tape"]))
+print()
+print("disk")
+print(s.find_policy_by_storage(["disk"], []))
+print()
+print("tape, not disk or obstore")
+print(s.find_policy_by_storage(["tape"], ["disk", "obstore"]))
+print()
+print("tape, not disk")
+print(s.find_policy_by_storage(["tape"], ["disk"]))
+print()
+print("tape")
+print(s.find_policy_by_storage(["tape"], []))
+print()
+print("obstore, not tape or disk")
+print(s.find_policy_by_storage(["obstore"], ["disk", "tape"]))
+print()
+print("obstore, not tape")
+print(s.find_policy_by_storage(["obstore"], ["tape"]))
+print()
+print("obstore")
+print(s.find_policy_by_storage(["obstore"], []))
+print()
+
 
 #print(s.find_storage_policy("/neodc/sentinel1a/data/x.dat"))
 #print(s.find_storage_policy("/neodc/sentinel1a/data//t/y/u/2014/01/03/x.dat", size=20))
