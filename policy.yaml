@@ -1,0 +1,33 @@
+name: Default policy  
+regex: /
+storage: [disk, tape]
+overridden_by:
+- name: Sentinel defaults to disk and tape, but with rolling window of files to tape only. 
+  regex: /neodc/sentinel
+  storage: [disk, tape]
+  overridden_by:
+  - larger_than: 10000000
+    regex: /neodc/sentinel1.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
+    regex_older_than: 6m
+    storage: [tape]
+  - larger_than: 10000000
+    regex: /neodc/sentinel2.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
+    regex_older_than: 3m
+    storage: [tape]
+  - larger_than: 10000000
+    regex: /neodc/sentinel3.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
+    regex_older_than: 2m
+    storage: [tape]
+  - larger_than: 10000000
+    regex: /neodc/sentinel5.*/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/
+    regex_older_than: 8m
+    storage: [tape]
+- regex: /badc/cmip6/
+  storage: [disk, tape]
+  overridden_by:
+  - larger_than: 10000000
+    regex: /HighResMIP/(ECMWF|MIROC)/.*/r([5-9]|\d{2,})i\dp\df\d
+    storage: [tape]
+- regex: /neodc/modis/data/
+  storage: [disk]
+

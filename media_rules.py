@@ -6,8 +6,12 @@ import json
 import re
 import datetime
 import sys
+import yaml
+import urllib.request
 
-class StoragePolicy:
+policy_location = "https://raw.githubusercontent.com/cedadev/media_rules/master/policy.yaml"
+
+class StoragePolicy():
 
     @staticmethod
     def dateparse(s):
@@ -28,10 +32,15 @@ class StoragePolicy:
 
     def __init__(self, cfg):
         if isinstance(cfg, str):
-            cfg = json.load(open(cfg))
+            cfg = yaml.load(urllib.request.urlopen(cfg), Loader=yaml.SafeLoader)
 
         if not isinstance(cfg, dict):
             raise ValueError("config needs to be a filename or a dict")
+
+        if "name" in cfg:
+            self.name = cfg["name"]
+        else:
+            self.name = None
 
         if "regex" in cfg:
             x = cfg["regex"]
@@ -65,7 +74,10 @@ class StoragePolicy:
                 self.overridden_by.append(StoragePolicy(sub_cfg))
 
     def __repr__(self):
-        s = "%s" % self.regex.pattern
+        if self.name is not None:
+            s = "%s (%s)" % (self.name, self.regex.pattern)
+        else:
+            s = "%s" % self.regex.pattern
         if self._mod_older_than is not None:
             s += " mod time older than %s" % self._mod_older_than
         if self._regex_older_than is not None:
@@ -127,8 +139,7 @@ class StoragePolicy:
         if self.match_storage_policy(path, size, mod):
             return self 
 
-
-s = StoragePolicy("policy.json")
+s = StoragePolicy(policy_location)
 s.tree()
 
 print()
@@ -145,3 +156,4 @@ print(s.find_storage_policy(path, size=size, mod=mod))
 #print(s.find_storage_policy("/neodc/sentinel1a/data//t/y/u/2014/01/03/x.dat", size=20))
 #print(s.find_storage_policy("/badc/cmip6/data"))
 #print(s.find_storage_policy("/neodc/modis/data/x/y/z"))
+
